@@ -1,0 +1,36 @@
+version: 2.1
+orbs:
+  codecov: codecov/codecov@3.2.5
+jobs:
+  build:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.36.2-jammy
+
+    # Steps to the job
+    steps:
+      - checkout
+      - run:
+          name: Download dependencies
+          command: npm ci
+      - run:
+          name: Run tests
+          command: npm run test
+          environment:
+            CI: true
+            PUBLIC_ENV: 'CI'
+            REUSE_SERVER: false
+            PUBLIC_MAILGUN_RECEIVING_EMAIL: 'test'
+            PUBLIC_MAILGUN_DOMAIN: 'test'
+            PUBLIC_MAILGUN_API_KEY: 'test'
+      - store_test_results:
+          path: report/report.xml
+      - run:
+          name: Calculate coverage
+          command: npm run coverage
+      - codecov/upload:
+          file: './coverage/coverage-final.json'
+# Invoke jobs via workflows
+workflows:
+  run-build-workflow:
+    jobs:
+      - build

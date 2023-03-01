@@ -1,0 +1,25 @@
+version: '3.9'
+
+services:
+  app:
+    container_name: ggg-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8080:8080'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080']
+      interval: 10s
+      timeout: 30s
+      retries: 10
+
+  tests:
+    container_name: ggg-tests
+    build:
+      context: .
+      dockerfile: Dockerfile.playwright
+    network_mode: 'host'
+    depends_on:
+      app:
+        condition: service_healthy
